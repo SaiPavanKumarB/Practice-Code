@@ -1,9 +1,11 @@
 # Set the working directory
-setwd("D:/Sri_DataScience_Practice/Big Mart Sales - Linear Regression Practice")
+setwd("D:/Sri_DataScience_Practice/Big Mart Sales Prediction")
 
 
 install.packages("dplyr")
+install.packages("gdata")
 library("dplyr")
+library("gdata")
 # Load the train file
 
 train = read.csv("Train.csv")
@@ -12,6 +14,8 @@ test = read.csv("Test.csv")
 # Verify the train data set
 str(train)
 summary(train)
+
+
 
 # Item_Fat content column has different descriptions. Regularizing the same
 unique(train$Item_Fat_Content)
@@ -29,8 +33,9 @@ NROW(train[trimws(train$Item_Type)=="",]) #
 NROW(train[is.na(train$Item_MRP),])
 NROW(train[is.na(train$Outlet_Identifier),])
 NROW(train[is.na(train$Outlet_Establishment_Year),])
-NROW(train[trimws(train$Outlet_Size)=="",]) # 2410 rows
-NROW(train[trimws(train$Outlet_Location_Type)=="",])
+NROW(train[trim(train$Outlet_Size)=="",]) # 2410 rows
+NROW(train[trim(train$Outlet_Location_Type)=="",])
+
 
 
 boxplot(train$Item_Weight)
@@ -62,10 +67,13 @@ str(train)
 
 # Still there are 4 missing values. Replace with Item Type Median
 
+
 for (i in 1:NROW(train)){
   if(is.na(train[,"Item_Weight"][i])){
-    train[i,"Item_Weight"]=median(data_A$Item_Weight, na.rm = TRUE)
-    remove(data_A)
+    data_B = train[which(train$Item_Type==train$Item_Type[i]), names(train) %in% c("Item_Type","Item_Weight")]
+    train[i,"Item_Weight"]=median(data_B$Item_Weight, na.rm = TRUE)
+    remove(data_B)
+    
   }
   
 }
@@ -75,4 +83,9 @@ for (i in 1:NROW(train)){
 # COnvert factor to numerical variables
 
 train$Outlet_Type=ifelse(train$Outlet_Type=="Grocery Store",0,ifelse(train$Outlet_Type=="Supermarket Type1",1,ifelse(train$Outlet_Type=="Supermarket Type2",2,3)))
-train$Outlet_Location_Type=ifelse(train$Outlet_Location_Type=="Tier 1",1,ifelse(train$Outlet_Type=="Tier 2"))
+train$Outlet_Location_Type=ifelse(train$Outlet_Location_Type=="Tier 1",1,ifelse(train$Outlet_Location_Type=="Tier 2",2,3))
+train$Outlet_Size=ifelse(train$Outlet_Size=="Small",1,(ifelse(train$Outlet_Size=="Medium",2,(ifelse(train$Outlet_Size=="High",3,0)))))
+
+
+
+
